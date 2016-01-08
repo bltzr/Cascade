@@ -28,7 +28,9 @@ class ofApp : public ofBaseApp{
     
         ofVideoPlayer trame;
         ofxOscSender sender;
+        ofxOscSender PWMsender;
         ofBuffer imgAsBuffer;
+        ofBuffer PWMBuffer;
         ofImage img;
     
 		

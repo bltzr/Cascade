@@ -23,16 +23,6 @@ void ofApp::setup(){
 void ofApp::update(){
 
     trame.update();
-}
-
-//--------------------------------------------------------------
-void ofApp::draw(){
-
-    
-    ofSetHexColor(0xFFFFFF);
-    
-    trame.draw(20,20);
-    ofSetHexColor(0x000000);
     ofPixels & pixels = trame.getPixels();
     
     int vidWidth = pixels.getWidth();
@@ -42,11 +32,16 @@ void ofApp::draw(){
     // ofSaveImage(pixels, imgAsBuffer, OF_IMAGE_FORMAT_JPEG, OF_IMAGE_QUALITY_BEST);
     
     // img.load(imgAsBuffer);
-
+    
     //ofBuffer pixBuf;
     imgAsBuffer.clear();
     imgAsBuffer.append((const char*)pixels.getData(),pixels.size()-64);
     
+    ofPixels PWMPix;
+    pixels.cropTo(PWMPix, 15, 0, 1, 16);
+    
+    PWMBuffer.clear();
+    PWMBuffer.append((const char*)PWMPix.getData(), PWMPix.size());
     
     ofxOscMessage m;
     m.setAddress("/image");
@@ -58,6 +53,25 @@ void ofApp::draw(){
     cout << "ofApp:: image's actual size: " << vidWidth * vidHeight * nChannels<< endl;
     cout << "ofApp:: sending image with size: " << imgAsBuffer.size() << endl;
     cout << "ofApp:: WTF factor: " << imgAsBuffer.size() - vidWidth * vidHeight * nChannels<< endl;
+   
+    ofxOscMessage n;
+    n.setAddress("/PWM");
+    n.addBlobArg(PWMBuffer);
+    sender.sendMessage(n);
+    cout << "ofApp:: sending image with size: " << PWMBuffer.size() << endl;
+}
+
+//--------------------------------------------------------------
+void ofApp::draw(){
+
+  
+    
+    ofSetHexColor(0xFFFFFF);
+    
+    trame.draw(16,16);
+    ofSetHexColor(0x000000);
+
+
 
 }
 
