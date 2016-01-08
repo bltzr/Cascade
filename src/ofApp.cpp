@@ -45,7 +45,7 @@ void ofApp::draw(){
 
     //ofBuffer pixBuf;
     imgAsBuffer.clear();
-    imgAsBuffer.append((const char*)pixels.getData(),pixels.size()-512);
+    imgAsBuffer.append((const char*)pixels.getData(),pixels.size()-64);
     
     
     ofxOscMessage m;
