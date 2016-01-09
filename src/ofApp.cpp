@@ -8,15 +8,15 @@ void ofApp::setup(){
     trame.setPixelFormat(OF_PIXELS_RGBA);
     
     trame.load("movies/testRaw3.mov");
-    //pour tester avec le son:
-    //     trame.load("movies/oh.mov");
     trame.setLoopState(OF_LOOP_NORMAL);
     trame.play();
     
     // open an outgoing connection to HOST:PORT
     sender.setup(HOST, PORT);
     
-    // imgAsBuffer = ofBufferFromFile("sendImageTest.jpg", true);
+    LEDnumb = 350;
+    PWMnumb = 8;
+
 }
 
 //--------------------------------------------------------------
@@ -28,12 +28,7 @@ void ofApp::update(){
     int vidWidth = pixels.getWidth();
     int vidHeight = pixels.getHeight();
     int nChannels = pixels.getNumChannels();
-    
-    // ofSaveImage(pixels, imgAsBuffer, OF_IMAGE_FORMAT_JPEG, OF_IMAGE_QUALITY_BEST);
-    
-    // img.load(imgAsBuffer);
-    
-    //ofBuffer pixBuf;
+
     imgAsBuffer.clear();
     imgAsBuffer.append((const char*)pixels.getData(),pixels.size()-64);
     
