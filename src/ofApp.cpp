@@ -14,8 +14,8 @@ void ofApp::setup(){
     // open an outgoing connection to HOST:PORT
     sender.setup(HOST, PORT);
     
-    LEDnumb = 350;
-    PWMnumb = 8;
+    const int LEDnumb = 350;
+    const int PWMnumb = 8;
 
 }
 

@@ -33,8 +33,6 @@ class ofApp : public ofBaseApp{
         ofBuffer PWMBuffer;
         ofImage img;
     
-        const int LEDnumb
-        const int PWMnumb
     
 		
 };
