@@ -1,0 +1,14 @@
+#N canvas 0 22 450 300 10;
+#X msg 67 38 listen 12345;
+#X obj 66 66 netreceive -u -b 12345;
+#X obj 65 99 oscparse;
+#X obj 64 130 list trim;
+#X obj 62 159 route image PWM;
+#X obj 55 201 print image;
+#X obj 147 204 print PWM;
+#X connect 0 0 1 0;
+#X connect 1 0 2 0;
+#X connect 2 0 3 0;
+#X connect 3 0 4 0;
+#X connect 4 0 5 0;
+#X connect 4 1 6 0;
