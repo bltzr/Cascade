@@ -1,2 +1,2 @@
 ofxOsc
-ofxGPIO
+ofxOMXPlayer

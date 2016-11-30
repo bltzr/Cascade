@@ -6,11 +6,11 @@ void ofApp::setup(){
     ofSetVerticalSync(true);
     ofSetFrameRate(120);
     
-    trame.setPixelFormat(OF_PIXELS_RGBA);
+    //trame.setPixelFormat(OF_PIXELS_NATIVE);
     
-    trame.load("movies/oh.mov");
-    trame.setLoopState(OF_LOOP_NORMAL);
-    trame.play();
+    trame.loadMovie("movies/test4440.mp4");
+    //trame.setLoopState(OF_LOOP_NORMAL);
+    //trame.play();
     
     // open an outgoing connection to HOST:PORT
     sender.setup(HOST, PORT);
@@ -32,47 +32,51 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
 
-    trame.update();
+    trame.updatePixels();
  
 // get part of the image for the LEDs
-    ofPixels & pixels = trame.getPixels();
-    unsigned char * LEDs = pixels.getData();
-    
+    //ofPixels & pixels = trame.getPixels();
+    //unsigned char * LEDs = pixels.getData();
+    unsigned char * LEDs = trame.getPixels();
+/*
     int vidWidth = pixels.getWidth();
     int vidHeight = pixels.getHeight();
+    //ofLog()<<"Res:"<<vidWidth<< "x" << vidHeight;
     int nChannels = pixels.getNumChannels();
     //ofLog()<<"Channels:"<<nChannels;
 
     imgAsBuffer.clear();
     imgAsBuffer.append((const char*)pixels.getData(),pixels.size()-64);
-
+*/
 // send to LEDs
     setLEDs(LEDnumb, LEDs, 3);
     //ofLog() << ofGetFrameRate();
-    
+ /*   
  // get part of the image for the PWMs
     ofPixels PWMPix;
     pixels.cropTo(PWMPix, 15, 0, 1, 16);
     
     PWMBuffer.clear();
     PWMBuffer.append((const char*)PWMPix.getData(), PWMPix.size());
-    
+ 
     ofxOscMessage m;
     m.setAddress("/image");
     m.addBlobArg(imgAsBuffer);
     sender.sendMessage(m);
-    /*cout << "ofApp:: ____________________________________ " << endl;
+    cout << "ofApp:: ____________________________________ " << endl;
     cout << "ofApp:: NEW FRAME " << endl;
     cout << "ofApp:: qdth / height / nChannels: " << vidWidth << " / " << vidHeight << " / " << nChannels << endl;
     cout << "ofApp:: image's actual size: " << vidWidth * vidHeight * nChannels<< endl;
     cout << "ofApp:: sending image with size: " << imgAsBuffer.size() << endl;
     cout << "ofApp:: WTF factor: " << imgAsBuffer.size() - vidWidth * vidHeight * nChannels<< endl;
-    */  
+      
     ofxOscMessage n;
     n.setAddress("/PWM");
     n.addBlobArg(PWMBuffer);
     sender.sendMessage(n);
     //cout << "ofApp:: sending image with size: " << PWMBuffer.size() << endl;
+ */  
+
 }
 
 //--------------------------------------------------------------
@@ -109,8 +113,8 @@ void ofApp::setLEDs(int numLed, unsigned char * LEDs, int BRIGHTNESS) {
                 }
                 for(a=0; a<numLed; a++){
                        buffer1[0]=(BRIGHTNESS & 0b00011111) | 0b11100000;
-                       buffer1[1]=LEDs[a*4+1];  //green
-                       buffer1[2]=LEDs[a*4+2];  //blue
+                       buffer1[1]=LEDs[a*4+2];  //green
+                       buffer1[2]=LEDs[a*4+1];  //blue
                        buffer1[3]=LEDs[a*4+0];  //red
                        wiringPiSPIDataRW(0, (unsigned char*)buffer1, 4);
                 }

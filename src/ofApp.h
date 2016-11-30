@@ -1,6 +1,7 @@
 #pragma once
 #include "ofMain.h"
 #include "ofxOsc.h"
+#include "ofxOMXPlayer.h"
 #include "wiringPi.h"
 #include "wiringPiSPI.h"
 
@@ -17,15 +18,15 @@ class ofApp : public ofBaseApp{
 		void setLEDs(int numLed, unsigned char * LEDs, int BRIGHTNESS);
 		void clearLEDs(int numLed);
     
-        ofVideoPlayer trame;
+        ofxOMXPlayer trame;
         ofxOscSender sender;
         ofxOscSender PWMsender;
         ofBuffer imgAsBuffer;
         ofBuffer PWMBuffer;
         ofImage img;
 
-    const int LEDnumb = 450;
-    const int PWMnumb = 8;    
+    const int LEDnumb = 280;
+    const int PWMnumb = 16;    
     
 		
 };
