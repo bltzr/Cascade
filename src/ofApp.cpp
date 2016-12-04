@@ -4,19 +4,17 @@
 void ofApp::setup(){
     ofBackground(0,0,0);
     ofSetVerticalSync(true);
-    ofSetFrameRate(120);
+    ofSetFrameRate(60);
     
     trame.setPixelFormat(OF_PIXELS_NATIVE);
     
-    trame.load("movies/test4440.mp4");
+    trame.load("movies/rougebleuB.mov");
     trame.setLoopState(OF_LOOP_NORMAL);
-    trame.play();
     
     // open an outgoing connection to HOST:PORT
     sender.setup(HOST, PORT);
 
-
-    ofSetFrameRate(60);
+    receiver.setup(PORTIN);
 
     wiringPiSetup();
     if(wiringPiSPISetup(0,7812500)<0){
@@ -32,48 +30,75 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
 
+    while(receiver.hasWaitingMessages()){
+        // get the next message
+        ofxOscMessage m;
+        receiver.getNextMessage(m);
+        
+        if(m.getAddress() == "/play"){
+            //ofLog() << "b" << m.getArgAsInt32(0);
+            if(m.getArgAsBool(0)){trame.play(); playing = 1;}
+            else if(!m.getArgAsBool(0)){trame.stop(); playing = 0; clearLEDs(LEDnumb);}
+        }
+       
+        if(m.getAddress() == "/brightness"){
+            brightnessNet = m.getArgAsInt(0);
+            //ofLog() << "b" << brightnessNet;
+        }
+        if(m.getAddress() == "/image"){
+        //    ofLog() << "nArgs" << m.getNumArgs();
+            //NetBuffer.clear();
+            NetBuffer = m.getArgAsBlob(0);
+        }    
+        
+    }
+
     trame.update();
  
 // get part of the image for the LEDs
-    ofPixels & pixels = trame.getPixels();
-    unsigned char * LEDs = pixels.getData();
-    
-    int vidWidth = pixels.getWidth();
-    int vidHeight = pixels.getHeight();
-    //ofLog()<<"Res:"<<vidWidth<< "x" << vidHeight;
-    int nChannels = pixels.getNumChannels();
-    //ofLog()<<"Channels:"<<nChannels;
 
-    imgAsBuffer.clear();
-    imgAsBuffer.append((const char*)pixels.getData(),pixels.size()-64);
+    if(playing){
+        ofPixels & pixels = trame.getPixels();
+        LEDs = pixels.getData();
+        brightness = LEDs[4095]/8;
+
+        imgAsBuffer.clear();
+        imgAsBuffer.append((const char*)pixels.getData(),pixels.size());
+
+         // get part of the image for the PWMs
+        ofPixels PWMPix;
+        pixels.cropTo(PWMPix, 15, 0, 1, 16);
+        
+        PWMBuffer.clear();
+        PWMBuffer.append((const char*)PWMPix.getData(), PWMPix.size());
+        
+        ofxOscMessage m;
+        m.setAddress("/image");
+        m.addBlobArg(imgAsBuffer);
+        sender.sendMessage(m);
+
+        ofxOscMessage n;
+        n.setAddress("/PWM");
+        n.addBlobArg(PWMBuffer);
+        sender.sendMessage(n);
+    }
+
+    else{
+        LEDs = (unsigned char*) NetBuffer.getData();
+        brightness = brightnessNet;
+    }
+    //ofLog()<<brightness;
+
+
+
+    //cout << "ofApp:: sending image with size: " << PWMBuffer.size() << endl;
+
 
 // send to LEDs
-    setLEDs(LEDnumb, LEDs, 3);
+    setLEDs(LEDnumb, LEDs, brightness);
     //ofLog() << ofGetFrameRate();
     
- // get part of the image for the PWMs
-    ofPixels PWMPix;
-    pixels.cropTo(PWMPix, 15, 0, 1, 16);
-    
-    PWMBuffer.clear();
-    PWMBuffer.append((const char*)PWMPix.getData(), PWMPix.size());
-    
-    ofxOscMessage m;
-    m.setAddress("/image");
-    m.addBlobArg(imgAsBuffer);
-    sender.sendMessage(m);
-    /*cout << "ofApp:: ____________________________________ " << endl;
-    cout << "ofApp:: NEW FRAME " << endl;
-    cout << "ofApp:: qdth / height / nChannels: " << vidWidth << " / " << vidHeight << " / " << nChannels << endl;
-    cout << "ofApp:: image's actual size: " << vidWidth * vidHeight * nChannels<< endl;
-    cout << "ofApp:: sending image with size: " << imgAsBuffer.size() << endl;
-    cout << "ofApp:: WTF factor: " << imgAsBuffer.size() - vidWidth * vidHeight * nChannels<< endl;
-    */  
-    ofxOscMessage n;
-    n.setAddress("/PWM");
-    n.addBlobArg(PWMBuffer);
-    sender.sendMessage(n);
-    //cout << "ofApp:: sending image with size: " << PWMBuffer.size() << endl;
+
 }
 
 //--------------------------------------------------------------
