@@ -8,7 +8,7 @@ void ofApp::setup(){
     
     trame.setPixelFormat(OF_PIXELS_NATIVE);
     
-    trame.load("movies/rougebleuB.mov");
+    trame.load("movies/rougebleuN.mov");
     trame.setLoopState(OF_LOOP_NORMAL);
     
     // open an outgoing connection to HOST:PORT
@@ -60,7 +60,7 @@ void ofApp::update(){
     if(playing){
         ofPixels & pixels = trame.getPixels();
         LEDs = pixels.getData();
-        brightness = LEDs[4095]/8;
+        brightness = LEDs[4095];
 
         imgAsBuffer.clear();
         imgAsBuffer.append((const char*)pixels.getData(),pixels.size());
@@ -126,18 +126,21 @@ void ofApp::setLEDs(int numLed, unsigned char * LEDs, int BRIGHTNESS) {
         int a;
                 uint8_t buffer0[1], buffer1[4];
                 srand(time(NULL));
-        if(BRIGHTNESS>30)
-            BRIGHTNESS=31;
+        if(BRIGHTNESS>254)
+            BRIGHTNESS=255;
+
+                //ofLog() << "mapBright: " << mapBright[BRIGHTNESS] ;
+                //ofLog() << "col: " << mapCol[BRIGHTNESS] ;
 
                 for(a=0; a<4; a++){
                        buffer0[0]=0b00000000;
                        wiringPiSPIDataRW(0, (unsigned char*)buffer0, 1);
                 }
                 for(a=0; a<numLed; a++){
-                       buffer1[0]=(BRIGHTNESS & 0b00011111) | 0b11100000;
-                       buffer1[1]=LEDs[a*4+2];  //green
-                       buffer1[2]=LEDs[a*4+1];  //blue
-                       buffer1[3]=LEDs[a*4+0];  //red
+                       buffer1[0]=(mapBright[BRIGHTNESS] & 0b00011111) | 0b11100000;
+                       buffer1[1]=(int)LEDs[a*4+2]*mapCol[BRIGHTNESS];  //green
+                       buffer1[2]=(int)LEDs[a*4+1]*mapCol[BRIGHTNESS];  //blue
+                       buffer1[3]=(int)LEDs[a*4+0]*mapCol[BRIGHTNESS];  //red
                        wiringPiSPIDataRW(0, (unsigned char*)buffer1, 4);
                 }
                 for(a=0; a<4; a++){
