@@ -78,8 +78,8 @@ void ofApp::update(){
         sender.sendMessage(m);
 
         ofxOscMessage n;
-        n.setAddress("/PWM");
-        n.addBlobArg(PWMBuffer);
+        n.setAddress("/brightness");
+        n.addIntArg(brightness);
         sender.sendMessage(n);
     }
 
