@@ -8,13 +8,18 @@ void ofApp::setup(){
     
     trame.setPixelFormat(OF_PIXELS_NATIVE);
     
-    trame.load("movies/rougebleuN.mov");
+    trame.load("/data/vid.mov");
+    ofLog() << "Loaded Mov";
     trame.setLoopState(OF_LOOP_NORMAL);
     
     // open an outgoing connection to HOST:PORT
     sender.setup(HOST, PORT);
 
+    ofLog() << "Opened OSC Sender";
+
     receiver.setup(PORTIN);
+
+    ofLog() << "Opened OSC Receiver";
 
     wiringPiSetup();
     if(wiringPiSPISetup(0,7812500)<0){
@@ -23,6 +28,10 @@ void ofApp::setup(){
     else{
         ofLog()<<"Open setup SPI!";
         wiringPiSetupSys() ;
+    }
+
+    if(playing){
+        trame.play();
     }
 
 }
