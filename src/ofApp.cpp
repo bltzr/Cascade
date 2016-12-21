@@ -12,10 +12,11 @@ void ofApp::setup(){
     ofLog() << "Loaded Mov";
     trame.setLoopState(OF_LOOP_NORMAL);
     
-    // open an outgoing connection to HOST:PORT
-    sender.setup(HOST, PORT);
-
-    ofLog() << "Opened OSC Sender";
+    if (send){ 
+        // open an outgoing connection to HOST:PORT
+        sender.setup(HOST, PORT);
+        ofLog() << "Opened OSC Sender";
+    }
 
     receiver.setup(PORTIN);
 
@@ -47,13 +48,9 @@ void ofApp::update(){
         if(m.getAddress() == "/play"){
             //ofLog() << "b" << m.getArgAsInt32(0);
             if(m.getArgAsBool(0)){trame.play(); playing = 1;}
-            else if(!m.getArgAsBool(0)){trame.stop(); playing = 0; clearLEDs(LEDnumb);}
+            else if(!m.getArgAsBool(0)){trame.stop(); playing = 0; clearLEDs(width*height);}
         }
-       
-        if(m.getAddress() == "/brightness"){
-            brightnessNet = m.getArgAsInt(0);
-            //ofLog() << "b" << brightnessNet;
-        }
+
         if(m.getAddress() == "/image"){
         //    ofLog() << "nArgs" << m.getNumArgs();
             //NetBuffer.clear();
@@ -69,32 +66,27 @@ void ofApp::update(){
     if(playing){
         ofPixels & pixels = trame.getPixels();
         LEDs = pixels.getData();
-        brightness = LEDs[4095];
 
-        imgAsBuffer.clear();
-        imgAsBuffer.append((const char*)pixels.getData(),pixels.size());
-
-         // get part of the image for the PWMs
+        // get part of the image for the PWMs
         ofPixels PWMPix;
         pixels.cropTo(PWMPix, 15, 0, 1, 16);
-        
-        PWMBuffer.clear();
-        PWMBuffer.append((const char*)PWMPix.getData(), PWMPix.size());
-        
-        ofxOscMessage m;
-        m.setAddress("/image");
-        m.addBlobArg(imgAsBuffer);
-        sender.sendMessage(m);
 
-        ofxOscMessage n;
-        n.setAddress("/brightness");
-        n.addIntArg(brightness);
-        sender.sendMessage(n);
+        if (send){     
+            imgAsBuffer.clear();
+            imgAsBuffer.append((const char*)pixels.getData(),pixels.size());
+
+            // PWMBuffer.clear();
+            // PWMBuffer.append((const char*)PWMPix.getData(), PWMPix.size());
+        
+            ofxOscMessage m;
+            m.setAddress("/image");
+            m.addBlobArg(imgAsBuffer);
+            sender.sendMessage(m);
+        }
     }
 
     else{
         LEDs = (unsigned char*) NetBuffer.getData();
-        brightness = brightnessNet;
     }
     //ofLog()<<brightness;
 
@@ -104,7 +96,7 @@ void ofApp::update(){
 
 
 // send to LEDs
-    setLEDs(LEDnumb, LEDs, brightness);
+    setLEDs(width*height, LEDs);
     //ofLog() << ofGetFrameRate();
     
 
@@ -126,35 +118,35 @@ void ofApp::draw(){
 //--------------------------------------------------------------
 void ofApp::exit() {
 
-    clearLEDs(LEDnumb);
+    clearLEDs(width*height);
 
 }
 
 //--------------------------------------------------------------
-void ofApp::setLEDs(int numLed, unsigned char * LEDs, int BRIGHTNESS) {
+void ofApp::setLEDs(int numLed, unsigned char * LEDs) {
         int a;
-                uint8_t buffer0[1], buffer1[4];
-                srand(time(NULL));
-        if(BRIGHTNESS>254)
-            BRIGHTNESS=255;
+            uint8_t buffer0[1], buffer1[4];
+            srand(time(NULL));
+            int BRIGHTNESS;
 
                 //ofLog() << "mapBright: " << mapBright[BRIGHTNESS] ;
                 //ofLog() << "col: " << mapCol[BRIGHTNESS] ;
 
                 for(a=0; a<4; a++){
-                       buffer0[0]=0b00000000;
-                       wiringPiSPIDataRW(0, (unsigned char*)buffer0, 1);
+                    buffer0[0]=0b00000000;
+                    wiringPiSPIDataRW(0, (unsigned char*)buffer0, 1);
                 }
                 for(a=0; a<numLed; a++){
-                       buffer1[0]=(mapBright[BRIGHTNESS] & 0b00011111) | 0b11100000;
-                       buffer1[1]=(int)LEDs[a*4+2]*mapCol[BRIGHTNESS];  //green
-                       buffer1[2]=(int)LEDs[a*4+1]*mapCol[BRIGHTNESS];  //blue
-                       buffer1[3]=(int)LEDs[a*4+0]*mapCol[BRIGHTNESS];  //red
-                       wiringPiSPIDataRW(0, (unsigned char*)buffer1, 4);
+                    BRIGHTNESS=(int)LEDs[a*4+3];
+                    buffer1[0]=(mapBright[BRIGHTNESS] & 0b00011111) | 0b11100000;
+                    buffer1[1]=(int)LEDs[a*4+2]*mapCol[BRIGHTNESS];  //green
+                    buffer1[2]=(int)LEDs[a*4+1]*mapCol[BRIGHTNESS];  //blue
+                    buffer1[3]=(int)LEDs[a*4+0]*mapCol[BRIGHTNESS];  //red
+                    wiringPiSPIDataRW(0, (unsigned char*)buffer1, 4);
                 }
                 for(a=0; a<4; a++){
-                       buffer0[0]=0b11111111;
-                       wiringPiSPIDataRW(0, (unsigned char*)buffer0, 1);
+                    buffer0[0]=0b11111111;
+                    wiringPiSPIDataRW(0, (unsigned char*)buffer0, 1);
                 }
               
 
@@ -185,3 +177,21 @@ void ofApp::clearLEDs(int numLed) {
               
 
     }
+
+
+//-------------------------------------------------------------- 
+/*void ofApp::parseYAML(){
+    yaml.load("m/data/init.yml");
+    
+    yaml.doc["width"] >> width;
+    yaml.doc["height"] >> height;
+    yaml.doc["pwm"] >> pwm;
+    yaml.doc["host"] >> host;
+    yaml.doc["send"] >> send;
+    
+    cout << dec << "width: " << width << "* height: " << height << endl; 
+    cout << "send: " << send << endl;
+
+}
+*/
+   
