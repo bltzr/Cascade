@@ -22,7 +22,8 @@ void ofApp::setup(){
 
     ofLog() << "Opened OSC Receiver";
 
-    wiringPiSetup();
+    
+
     if(wiringPiSPISetup(0,7812500)<0){
         ofLog() << "Failed to setup SPI!";
     }
@@ -31,15 +32,31 @@ void ofApp::setup(){
         wiringPiSetupSys() ;
     }
 
+    wiringPiSetup();
+
+    pinMode (pwmMap[0], PWM_OUTPUT) ;
+    //ofLog() << pwmMap [i] ;
+    //softPwmCreate (1, 0, 100) ;
+    for (i = 1 ; i < NUM_PWMs ; ++i)
+        {   
+        softPwmCreate (pwmMap [i], 0, PWM_RANGE) ;
+        //  printf ("%3d, %3d, %3d\n", i, pwmMap [i], values [i]) ;
+        }
+    
+
+
+
+    /*
     if(playing){
         trame.play();
     }
-
+    */
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
 
+   
     while(receiver.hasWaitingMessages()){
         // get the next message
         ofxOscMessage m;
@@ -57,20 +74,33 @@ void ofApp::update(){
             NetBuffer = m.getArgAsBlob(0);
         }    
         
+        if(m.getAddress() == "/PWMs"){
+        //    ofLog() << "nArgs" << m.getNumArgs();
+            //NetBuffer.clear();
+            PWMBuffer = m.getArgAsBlob(0);
+        }    
+
     }
 
     trame.update();
  
-// get part of the image for the LEDs
+
 
     if(playing){
+
+        // get part of the image for the LEDs
         ofPixels & pixels = trame.getPixels();
         LEDs = pixels.getData();
 
         // get part of the image for the PWMs
         ofPixels PWMPix;
-        pixels.cropTo(PWMPix, 15, 0, 1, 16);
-
+        pixels.cropTo(PWMPix, 0, 31, NUM_PWMs, 1);
+        PWMs = PWMPix.getData();
+           for (i = 0 ; i < NUM_PWMs ; ++i)
+        {
+            ofLog() <<  "frame:" << i << ":  " << (int)PWMs[i*4] << "  " << (int)PWMs[i*4+1] << "  " <<  (int)PWMs[i*4+2] << "  " <<  (int)PWMs[i*4+3] ;
+        }  ;
+        
         if (send){     
             imgAsBuffer.clear();
             imgAsBuffer.append((const char*)pixels.getData(),pixels.size());
@@ -83,21 +113,44 @@ void ofApp::update(){
             m.addBlobArg(imgAsBuffer);
             sender.sendMessage(m);
         }
+        
     }
 
     else{
         LEDs = (unsigned char*) NetBuffer.getData();
+        PWMs = (unsigned char*) PWMBuffer.getData();
     }
-    //ofLog()<<brightness;
-
-
-
-    //cout << "ofApp:: sending image with size: " << PWMBuffer.size() << endl;
 
 
 // send to LEDs
     setLEDs(width*height, LEDs);
     //ofLog() << ofGetFrameRate();
+
+// send to PWMs
+
+    //if (j > 1023) {j=0;}
+    //else j+=1;
+    
+    //pwmWrite (pwmMap [0], j) ;
+    //pwmWrite (pwmMap [0], j) ;
+    //softPwmWrite (pwmMap [0], 300) ;
+    //softPwmWrite (1, 20) ;
+    //delay (10) ;
+    //softPwmWrite (pwmMap [4], j) ;
+    //softPwmWrite (4, 70) ;
+    //delay (10) ;
+    //ofLog() <<  j ;
+    
+    pwmWrite (pwmMap [0], PWMs[0]+PWMs[1]+PWMs[2]+PWMs[3]) ;
+    ofLog() << "PWM " << 0 << ":    " << pwmMap [0] <<  " ->    " << PWMs[0]+PWMs[1]+PWMs[2]+PWMs[3];
+    for (i = 1 ; i < NUM_PWMs ; ++i)
+        {
+            softPwmWrite (pwmMap [i], PWMs[i*4]+PWMs[i*4+1]+PWMs[i*4+2]+PWMs[i*4+3]) ;
+            ofLog() << "PWM " << i << ":    " << pwmMap [i] <<  " ->    " <<  PWMs[i*4]+PWMs[i*4+1]+PWMs[i*4+2]+PWMs[i*4+3];
+        //  delay (10) ; // from wiringPi's example code -is this necessary ?
+        }    
+   
+    ofLog() <<  "next frame";
     
 
 }
@@ -118,7 +171,7 @@ void ofApp::draw(){
 //--------------------------------------------------------------
 void ofApp::exit() {
 
-    clearLEDs(width*height);
+   //clearLEDs(width*height);
 
 }
 
