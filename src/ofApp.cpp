@@ -46,11 +46,11 @@ void ofApp::setup(){
 
 
 
-    /*
+    
     if(playing){
         trame.play();
     }
-    */
+    
 }
 
 //--------------------------------------------------------------
@@ -89,18 +89,17 @@ void ofApp::update(){
     if(playing){
 
         // get part of the image for the LEDs
-        ofPixels & pixels = trame.getPixels();
+        pixels = trame.getPixels();
         LEDs = pixels.getData();
 
         // get part of the image for the PWMs
-        ofPixels PWMPix;
         pixels.cropTo(PWMPix, 0, 31, NUM_PWMs, 1);
         PWMs = PWMPix.getData();
-           for (i = 0 ; i < NUM_PWMs ; ++i)
+        /*   for (i = 0 ; i < NUM_PWMs ; ++i)
         {
             ofLog() <<  "frame:" << i << ":  " << (int)PWMs[i*4] << "  " << (int)PWMs[i*4+1] << "  " <<  (int)PWMs[i*4+2] << "  " <<  (int)PWMs[i*4+3] ;
         }  ;
-        
+        */
         if (send){     
             imgAsBuffer.clear();
             imgAsBuffer.append((const char*)pixels.getData(),pixels.size());
@@ -141,16 +140,16 @@ void ofApp::update(){
     //delay (10) ;
     //ofLog() <<  j ;
     
-    pwmWrite (pwmMap [0], PWMs[0]+PWMs[1]+PWMs[2]+PWMs[3]) ;
-    ofLog() << "PWM " << 0 << ":    " << pwmMap [0] <<  " ->    " << PWMs[0]+PWMs[1]+PWMs[2]+PWMs[3];
+    pwmWrite (pwmMap [0], (int)(PWMs[0]+PWMs[1]+PWMs[2]+PWMs[3])) ;
+    //ofLog() << "PWM " << 0 << ":    " << pwmMap [0] <<  " ->    " << (int)(PWMs[0]+PWMs[1]+PWMs[2]+PWMs[3]);
     for (i = 1 ; i < NUM_PWMs ; ++i)
         {
             softPwmWrite (pwmMap [i], PWMs[i*4]+PWMs[i*4+1]+PWMs[i*4+2]+PWMs[i*4+3]) ;
-            ofLog() << "PWM " << i << ":    " << pwmMap [i] <<  " ->    " <<  PWMs[i*4]+PWMs[i*4+1]+PWMs[i*4+2]+PWMs[i*4+3];
+            //ofLog() << "PWM " << i << ":    " << pwmMap [i] <<  " ->    " <<  (int)(PWMs[i*4]+PWMs[i*4+1]+PWMs[i*4+2]+PWMs[i*4+3]);
         //  delay (10) ; // from wiringPi's example code -is this necessary ?
         }    
    
-    ofLog() <<  "next frame";
+    //ofLog() <<  "next frame";
     
 
 }
@@ -160,10 +159,17 @@ void ofApp::draw(){
 
   /*
     
+    // Clear with alpha, so we can capture via syphon and composite elsewhere should we want.
+    glClearColor(0.0, 0.0, 0.0, 0.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
     ofSetHexColor(0xFFFFFF);
     
-    trame.draw(16,16);
-    ofSetHexColor(0x000000);
+    img.setFromPixels(pixels);
+    img.draw(100, 100, 320, 320);
+    
+    PWMimg.setFromPixels(PWMPix);
+    PWMimg.draw(100, 500, 320, 50);
     
     */
 
@@ -171,7 +177,15 @@ void ofApp::draw(){
 //--------------------------------------------------------------
 void ofApp::exit() {
 
-   //clearLEDs(width*height);
+   clearLEDs(width*height);
+    pwmWrite (pwmMap [0], 0) ;
+    //ofLog() << "PWM " << 0 << ":    " << pwmMap [0] <<  " ->    " << (int)(PWMs[0]+PWMs[1]+PWMs[2]+PWMs[3]);
+    for (i = 1 ; i < NUM_PWMs ; ++i)
+        {
+            softPwmWrite (pwmMap [i], 0) ;
+            //ofLog() << "PWM " << i << ":    " << pwmMap [i] <<  " ->    " <<  (int)(PWMs[i*4]+PWMs[i*4+1]+PWMs[i*4+2]+PWMs[i*4+3]);
+        //  delay (10) ; // from wiringPi's example code -is this necessary ?
+        }   
 
 }
 

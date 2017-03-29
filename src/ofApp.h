@@ -31,7 +31,8 @@ class ofApp : public ofBaseApp{
         ofBuffer imgAsBuffer;
         ofBuffer NetBuffer;
         ofBuffer PWMBuffer;
-        ofImage img;
+        ofImage img, PWMimg;
+        ofPixels pixels, PWMPix; 
 //      ofxYAML yaml;
         unsigned char * LEDs;
         unsigned char * PWMs;
