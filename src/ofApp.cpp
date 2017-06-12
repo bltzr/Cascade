@@ -49,6 +49,7 @@ void ofApp::update(){
             //ofLog() << "b" << m.getArgAsInt32(0);
             if(m.getArgAsBool(0)){trame.play(); playing = 1;}
             else if(!m.getArgAsBool(0)){trame.stop(); playing = 0; clearLEDs(width*height);}
+            
         }
 
         if(m.getAddress() == "/image"){
