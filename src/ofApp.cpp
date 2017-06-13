@@ -4,7 +4,7 @@
 void ofApp::setup(){
     ofBackground(0,0,0);
     ofSetVerticalSync(true);
-    ofSetFrameRate(60);
+    ofSetFrameRate(60); 
     
     trame.setPixelFormat(OF_PIXELS_NATIVE);
     
