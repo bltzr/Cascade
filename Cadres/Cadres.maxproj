@@ -2,18 +2,17 @@
 	"name" : "Cadre-Pi",
 	"version" : 1,
 	"creationdate" : -714990735,
-	"modificationdate" : -714938740,
-	"viewrect" : [ 230.0, 51.0, 302.0, 749.0 ],
+	"modificationdate" : -714763455,
+	"viewrect" : [ 380.0, 160.0, 302.0, 749.0 ],
 	"autoorganize" : 1,
 	"hideprojectwindow" : 0,
 	"showdependencies" : 1,
 	"autolocalize" : 0,
 	"contents" : 	{
 		"patchers" : 		{
-			"Cadre-Pi.maxpat" : 			{
+			"Cadres.maxpat" : 			{
 				"kind" : "patcher",
-				"local" : 1,
-				"toplevel" : 1
+				"local" : 1
 			}
 
 		}
