@@ -4,7 +4,7 @@
 //#include "ofxYAML.h"
 #include "wiringPi.h"
 #include "wiringPiSPI.h"
-#include <softPwm.h>
+//#include <softPwm.h> // this one might cause problems
 
 #define HOST "bltzr.local"
 #define PORT 12345
