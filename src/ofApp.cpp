@@ -7,15 +7,33 @@ void ofApp::setup(){
     ofSetFrameRate(60);
     
     trame.setPixelFormat(OF_PIXELS_NATIVE);
+
+    dir.open("/data");
+    dir.allowExt("mov");
+    dir.listDir();
     
-    trame.load("/data/vid.mov");
-    ofLog() << "Loaded Mov";
+    //trame.load("/data/vid.mov");
+    trame.load(dir.getPath(0));
+    ofLog() << "Loaded Mov: ";// << "/data/"+dir.listDir(0);
     trame.setLoopState(OF_LOOP_NORMAL);
     
-    if (send){ 
-        // open an outgoing connection to HOST:PORT
-        sender.setup(HOST, PORT);
-        ofLog() << "Opened OSC Sender";
+    //if (send){ 
+    // open an outgoing connection to HOST:PORT
+    sender.setup(HOST, PORT);
+    ofLog() << "Opened OSC Sender";
+    //}
+
+    ofxOscMessage m;
+    m.setAddress("/file");
+    m.addStringArg("start");
+    sender.sendMessage(m);
+
+    for(int i = 0; i < (int)dir.size(); i++){
+        ofLogNotice(dir.getPath(i));
+        ofxOscMessage m;
+        m.setAddress("/file");
+        m.addStringArg(dir.getPath(i));
+        sender.sendMessage(m);
     }
 
     receiver.setup(PORTIN);
@@ -56,6 +74,14 @@ void ofApp::update(){
             //NetBuffer.clear();
             NetBuffer = m.getArgAsBlob(0);
         }    
+
+        if(m.getAddress() == "/file"){
+        //    ofLog() << "nArgs" << m.getNumArgs();
+            //NetBuffer.clear();
+            trame.load(m.getArgAsString(0));
+            //ofLog(m.getArgAsString(0));
+            trame.play();
+        } 
         
     }
 

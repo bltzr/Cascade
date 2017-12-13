@@ -4,6 +4,7 @@
 //#include "ofxYAML.h"
 #include "wiringPi.h"
 #include "wiringPiSPI.h"
+#include <softPwm.h>
 
 #define HOST "bltzr.local"
 #define PORT 12345
@@ -18,7 +19,7 @@ class ofApp : public ofBaseApp{
 		void exit();
 		void setLEDs(int numLed, unsigned char * LEDs);
 		void clearLEDs(int numLed);
-		void parseYAML();
+//		void parseYAML();
     
         ofVideoPlayer trame;
         ofxOscSender sender;
@@ -27,6 +28,7 @@ class ofApp : public ofBaseApp{
         ofBuffer NetBuffer;
         ofBuffer PWMBuffer;
         ofImage img;
+        ofDirectory dir;
 //        ofxYAML yaml;
         unsigned char * LEDs;
 
