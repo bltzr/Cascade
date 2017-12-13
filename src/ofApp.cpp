@@ -4,7 +4,7 @@
 void ofApp::setup(){
     ofBackground(0,0,0);
     ofSetVerticalSync(true);
-    ofSetFrameRate(60);
+    ofSetFrameRate(60); 
     
     trame.setPixelFormat(OF_PIXELS_NATIVE);
 
@@ -67,6 +67,7 @@ void ofApp::update(){
             //ofLog() << "b" << m.getArgAsInt32(0);
             if(m.getArgAsBool(0)){trame.play(); playing = 1;}
             else if(!m.getArgAsBool(0)){trame.stop(); playing = 0; clearLEDs(width*height);}
+            
         }
 
         if(m.getAddress() == "/image"){
