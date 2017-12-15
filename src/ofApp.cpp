@@ -11,30 +11,35 @@ void ofApp::setup(){
     dir.open("/data");
     dir.allowExt("mov");
     dir.listDir();
-    
-    //trame.load("/data/vid.mov");
-    trame.load(dir.getPath(0));
-    ofLog() << "Loaded Mov: ";// << "/data/"+dir.listDir(0);
-    trame.setLoopState(OF_LOOP_NORMAL);
-    
+    ofLog() << "Loading Dir: ";
+    dir.sort();
+        
     //if (send){ 
     // open an outgoing connection to HOST:PORT
     sender.setup(HOST, PORT);
     ofLog() << "Opened OSC Sender";
     //}
 
-    ofxOscMessage m;
-    m.setAddress("/file");
-    m.addStringArg("start");
-    sender.sendMessage(m);
+    // get host name of this computer
+    FILE* stream = popen( "hostname", "r" );  
+    ostringstream output;  
 
-    for(int i = 0; i < (int)dir.size(); i++){
-        ofLogNotice(dir.getPath(i));
-        ofxOscMessage m;
-        m.setAddress("/file");
-        m.addStringArg(dir.getPath(i));
-        sender.sendMessage(m);
-    }
+    while( !feof( stream ) && !ferror( stream ))  
+    {  
+        char buf[128];  
+        int bytesRead = fread( buf, 1, 128, stream );  
+        output.write( buf, bytesRead );  
+    }  
+    thisHostName = output.str();  
+
+    sendFileList();
+
+    //trame.load("/data/vid.mov");
+    trame.load(dir.getPath(0));
+    ofLog() << "Loaded Mov: " << dir.getPath(0);// << "/data/"+dir.listDir(0);
+    trame.setLoopState(OF_LOOP_NORMAL);
+
+
 
     receiver.setup(PORTIN);
 
@@ -83,6 +88,19 @@ void ofApp::update(){
             //ofLog(m.getArgAsString(0));
             trame.play();
         } 
+
+        if(m.getAddress() == "/host"){
+            //    ofLog() << "nArgs" << m.getNumArgs();
+            //NetBuffer.clear();
+            host=m.getArgAsString(0);
+            sender.setup(host, PORT);
+
+            // now send list of files 
+            sendFileList();
+            
+        } 
+
+
         
     }
 
@@ -94,9 +112,11 @@ void ofApp::update(){
         ofPixels & pixels = trame.getPixels();
         LEDs = pixels.getData();
 
-        // get part of the image for the PWMs
-        ofPixels PWMPix;
-        pixels.cropTo(PWMPix, 15, 0, 1, 16);
+        if (pwm>0){
+            // get part of the image for the PWMs
+            ofPixels PWMPix;
+            pixels.cropTo(PWMPix, 15, 0, 1, 16);
+        }
 
         if (send){     
             imgAsBuffer.clear();
@@ -207,6 +227,24 @@ void ofApp::clearLEDs(int numLed) {
 
 
 //-------------------------------------------------------------- 
+
+void ofApp::sendFileList(){
+
+    ofxOscMessage m;
+    m.setAddress("/file");
+    m.addStringArg(thisHostName);
+    m.addStringArg("start");
+    sender.sendMessage(m);
+
+    for(int i = 0; i < (int)dir.size(); i++){
+        ofLogNotice(dir.getPath(i));
+        ofxOscMessage m;
+        m.setAddress("/file");
+        m.addStringArg(thisHostName);
+        m.addStringArg(dir.getPath(i));
+        sender.sendMessage(m);
+    }
+}    
 /*void ofApp::parseYAML(){
     yaml.load("m/data/init.yml");
     
