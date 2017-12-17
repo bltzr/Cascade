@@ -9,11 +9,11 @@
 			"modernui" : 1
 		}
 ,
-		"rect" : [ -1264.0, 282.0, 973.0, 537.0 ],
+		"rect" : [ 0.0, 282.0, 973.0, 537.0 ],
 		"bgcolor" : [ 0.0, 0.0, 0.0, 1.0 ],
 		"editing_bgcolor" : [ 0.239216, 0.254902, 0.278431, 1.0 ],
 		"bglocked" : 0,
-		"openinpresentation" : 0,
+		"openinpresentation" : 1,
 		"default_fontsize" : 12.0,
 		"default_fontface" : 0,
 		"default_fontname" : "Arial",
@@ -130,7 +130,7 @@
 , 			{
 				"box" : 				{
 					"id" : "obj-42",
-					"items" : [ "0BehindTheLock.mov", ",", "0to1.mov", ",", "rouge-Central-vertical.mov" ],
+					"items" : "<empty>",
 					"maxclass" : "umenu",
 					"numinlets" : 1,
 					"numoutlets" : 3,
@@ -216,7 +216,7 @@
 , 			{
 				"box" : 				{
 					"id" : "obj-35",
-					"items" : [ "0BehindTheLock.mov", ",", "0to1.mov", ",", "rouge-Central-vertical.mov" ],
+					"items" : "<empty>",
 					"maxclass" : "umenu",
 					"numinlets" : 1,
 					"numoutlets" : 3,
@@ -635,7 +635,7 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-16", 0 ],
-					"order" : 4,
+					"order" : 5,
 					"source" : [ "obj-2", 0 ]
 				}
 
@@ -644,7 +644,7 @@
 				"patchline" : 				{
 					"destination" : [ "obj-3", 0 ],
 					"hidden" : 1,
-					"order" : 5,
+					"order" : 4,
 					"source" : [ "obj-2", 0 ]
 				}
 
@@ -754,7 +754,7 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-16", 3 ],
-					"order" : 3,
+					"order" : 4,
 					"source" : [ "obj-38", 1 ]
 				}
 
@@ -762,7 +762,7 @@
 , 			{
 				"patchline" : 				{
 					"destination" : [ "obj-3", 3 ],
-					"order" : 4,
+					"order" : 3,
 					"source" : [ "obj-38", 1 ]
 				}
 
@@ -828,13 +828,13 @@
 			}
  ],
 		"parameters" : 		{
+			"obj-30" : [ "umenu[5]", "umenu[1]", 0 ],
 			"obj-5" : [ "live.text", "live.text", 0 ],
+			"obj-15" : [ "umenu[3]", "umenu[1]", 0 ],
+			"obj-11" : [ "umenu[1]", "umenu[1]", 0 ],
 			"obj-35" : [ "umenu[7]", "umenu[1]", 0 ],
 			"obj-42" : [ "umenu[9]", "umenu[1]", 0 ],
-			"obj-30" : [ "umenu[5]", "umenu[1]", 0 ],
-			"obj-15" : [ "umenu[3]", "umenu[1]", 0 ],
-			"obj-38" : [ "umenu", "umenu", 0 ],
-			"obj-11" : [ "umenu[1]", "umenu[1]", 0 ]
+			"obj-38" : [ "umenu", "umenu", 0 ]
 		}
 ,
 		"dependency_cache" : [ 			{
