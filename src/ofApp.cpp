@@ -39,7 +39,11 @@ void ofApp::setup(){
     ofLog() << "Loaded Mov: " << dir.getPath(0);// << "/data/"+dir.listDir(0);
     trame.setLoopState(OF_LOOP_NORMAL);
 
-
+/*
+    NetBuffer.size(width*height);
+    unsigned char* ptr = NetBuffer.getData();
+    for (int i = 0; i<NetBuffer.size(); i++) {ptr[i] = 0;}
+*/
 
     receiver.setup(PORTIN);
 
@@ -53,6 +57,8 @@ void ofApp::setup(){
         ofLog()<<"Open setup SPI!";
         wiringPiSetupSys() ;
     }
+
+    //clearLEDs(width*height);
 
     if(playing){
         trame.play();
@@ -75,11 +81,12 @@ void ofApp::update(){
             
         }
 
-        if(m.getAddress() == "/image"){
+        if( !playing && m.getAddress() == "/image"){
         //    ofLog() << "nArgs" << m.getNumArgs();
             //NetBuffer.clear();
             NetBuffer = m.getArgAsBlob(0);
-        }    
+            setLEDs(NetBuffer.size(), (unsigned char*)NetBuffer.getData());
+        } 
 
         if(m.getAddress() == "/file"){
         //    ofLog() << "nArgs" << m.getNumArgs();
@@ -99,16 +106,13 @@ void ofApp::update(){
             sendFileList();
             
         } 
-
-
         
     }
-
-    trame.update();
  
 // get part of the image for the LEDs
 
     if(playing){
+        trame.update();
         ofPixels & pixels = trame.getPixels();
         LEDs = pixels.getData();
 
@@ -130,20 +134,17 @@ void ofApp::update(){
             m.addBlobArg(imgAsBuffer);
             sender.sendMessage(m);
         }
-    }
+    
+    setLEDs(width*height, LEDs);
 
+    }
+/*
     else{
         LEDs = (unsigned char*) NetBuffer.getData();
     }
-    //ofLog()<<brightness;
-
-
-
-    //cout << "ofApp:: sending image with size: " << PWMBuffer.size() << endl;
-
-
+*/
 // send to LEDs
-    setLEDs(width*height, LEDs);
+    
     //ofLog() << ofGetFrameRate();
     
 
@@ -202,25 +203,28 @@ void ofApp::setLEDs(int numLed, unsigned char * LEDs) {
 //--------------------------------------------------------------
 void ofApp::clearLEDs(int numLed) {
         int a;
-                uint8_t buffer0[1], buffer1[4];
-                srand(time(NULL));
+        uint8_t buffer0[1], buffer1[4];
+        srand(time(NULL));
 
 
-                for(a=0; a<4; a++){
-                       buffer0[0]=0b00000000;
-                       wiringPiSPIDataRW(0, (unsigned char*)buffer0, 1);
-                }
-                for(a=0; a<numLed; a++){
-                       buffer1[0]=(0 & 0b00011111) | 0b11100000;
-                       buffer1[1]=0;  //green
-                       buffer1[2]=0;  //blue
-                       buffer1[3]=0;  //red
-                       wiringPiSPIDataRW(0, (unsigned char*)buffer1, 4);
-                }
-                for(a=0; a<4; a++){
-                       buffer0[0]=0b11111111;
-                       wiringPiSPIDataRW(0, (unsigned char*)buffer0, 1);
-                }
+        for(a=0; a<4; a++){
+               buffer0[0]=0b00000000;
+               wiringPiSPIDataRW(0, (unsigned char*)buffer0, 1);
+        }
+        for(a=0; a<numLed; a++){
+                LEDs[a]=0;
+                LEDs[a+1]=0;
+                LEDs[a+2]=0;
+                buffer1[0]=(0 & 0b00011111) | 0b11100000;
+                buffer1[1]=0;  //green
+                buffer1[2]=0;  //blue
+                buffer1[3]=0;  //red
+                wiringPiSPIDataRW(0, (unsigned char*)buffer1, 4);
+        }
+        for(a=0; a<4; a++){
+               buffer0[0]=0b11111111;
+               wiringPiSPIDataRW(0, (unsigned char*)buffer0, 1);
+        }
               
 
     }
