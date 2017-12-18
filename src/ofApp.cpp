@@ -39,12 +39,6 @@ void ofApp::setup(){
     ofLog() << "Loaded Mov: " << dir.getPath(0);// << "/data/"+dir.listDir(0);
     trame.setLoopState(OF_LOOP_NORMAL);
 
-/*
-    NetBuffer.size(width*height);
-    unsigned char* ptr = NetBuffer.getData();
-    for (int i = 0; i<NetBuffer.size(); i++) {ptr[i] = 0;}
-*/
-
     receiver.setup(PORTIN);
 
     ofLog() << "Opened OSC Receiver";
@@ -89,7 +83,7 @@ void ofApp::update(){
         } 
 
         if(m.getAddress() == "/file"){
-        //    ofLog() << "nArgs" << m.getNumArgs();
+            //ofLog() << "nArgs" << m.getNumArgs();
             //NetBuffer.clear();
             trame.load(m.getArgAsString(0));
             //ofLog(m.getArgAsString(0));
@@ -138,15 +132,7 @@ void ofApp::update(){
     setLEDs(width*height, LEDs);
 
     }
-/*
-    else{
-        LEDs = (unsigned char*) NetBuffer.getData();
-    }
-*/
-// send to LEDs
-    
-    //ofLog() << ofGetFrameRate();
-    
+
 
 }
 
@@ -203,28 +189,14 @@ void ofApp::setLEDs(int numLed, unsigned char * LEDs) {
 //--------------------------------------------------------------
 void ofApp::clearLEDs(int numLed) {
         int a;
-        uint8_t buffer0[1], buffer1[4];
-        srand(time(NULL));
 
-
-        for(a=0; a<4; a++){
-               buffer0[0]=0b00000000;
-               wiringPiSPIDataRW(0, (unsigned char*)buffer0, 1);
-        }
         for(a=0; a<numLed; a++){
                 LEDs[a]=0;
                 LEDs[a+1]=0;
                 LEDs[a+2]=0;
-                buffer1[0]=(0 & 0b00011111) | 0b11100000;
-                buffer1[1]=0;  //green
-                buffer1[2]=0;  //blue
-                buffer1[3]=0;  //red
-                wiringPiSPIDataRW(0, (unsigned char*)buffer1, 4);
         }
-        for(a=0; a<4; a++){
-               buffer0[0]=0b11111111;
-               wiringPiSPIDataRW(0, (unsigned char*)buffer0, 1);
-        }
+
+        setLEDs(numLed, LEDs);
               
 
     }
