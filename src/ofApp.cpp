@@ -191,9 +191,10 @@ void ofApp::clearLEDs(int numLed) {
         int a;
 
         for(a=0; a<numLed; a++){
-                LEDs[a]=0;
-                LEDs[a+1]=0;
-                LEDs[a+2]=0;
+                LEDs[a*4+0]=0;
+                LEDs[a*4+1]=0;
+                LEDs[a*4+2]=0;
+                LEDs[a*4+3]=0;
         }
 
         setLEDs(numLed, LEDs);
