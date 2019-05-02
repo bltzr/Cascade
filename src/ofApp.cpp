@@ -56,6 +56,7 @@ void ofApp::setup(){
 
     if(playing){
         trame.play();
+        trame.setPaused(1);
     }
 
 }
@@ -80,7 +81,19 @@ void ofApp::update(){
             //NetBuffer.clear();
             NetBuffer = m.getArgAsBlob(0);
             setLEDs(NetBuffer.size(), (unsigned char*)NetBuffer.getData());
-        } 
+        }
+
+        if(m.getAddress() == "/pause"){
+            //ofLog() << "pause" << m.getArgAsInt32(0);
+            if(m.getArgAsBool(0)){trame.setPaused(1);}    
+            else if(!m.getArgAsBool(0)){trame.setPaused(0);}
+        }
+
+        if(m.getAddress() == "/position"){
+            //ofLog() << "position" << m.getArgAsFloat(0);
+            trame.setPosition(m.getArgAsFloat(0));
+        }
+
 
         if(m.getAddress() == "/file"){
             //ofLog() << "nArgs" << m.getNumArgs();
