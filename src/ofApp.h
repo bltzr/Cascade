@@ -47,7 +47,7 @@ class ofApp : public ofBaseApp{
 
     	// Init default parameters: will be parsed from the YAML file
         string host = "bltzr.local";
-		int width = 14, height = 20, pwm = 0;
+		int width = 23, height = 27, pwm = 0;
 		bool send = 0;
 		
 };
