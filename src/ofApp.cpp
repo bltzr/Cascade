@@ -4,7 +4,7 @@
 void ofApp::setup(){
     ofBackground(0,0,0);
     ofSetVerticalSync(true);
-    ofSetFrameRate(60); 
+    ofSetFrameRate(60);
     
     trame.setPixelFormat(OF_PIXELS_NATIVE);
 
@@ -14,23 +14,23 @@ void ofApp::setup(){
     ofLog() << "Loading Dir: ";
     dir.sort();
         
-    //if (send){ 
+    //if (send){
     // open an outgoing connection to HOST:PORT
     sender.setup(HOST, PORT);
     ofLog() << "Opened OSC Sender";
     //}
 
     // get host name of this computer
-    FILE* stream = popen( "hostname", "r" );  
-    ostringstream output;  
+    FILE* stream = popen( "hostname", "r" );
+    ostringstream output;
 
-    while( !feof( stream ) && !ferror( stream ))  
-    {  
-        char buf[128];  
-        int bytesRead = fread( buf, 1, 128, stream );  
-        output.write( buf, bytesRead );  
-    }  
-    thisHostName = output.str();  
+    while( !feof( stream ) && !ferror( stream ))
+    {
+        char buf[128];
+        int bytesRead = fread( buf, 1, 128, stream );
+        output.write( buf, bytesRead );
+    }
+    thisHostName = output.str();
 
     sendFileList();
 
@@ -56,6 +56,7 @@ void ofApp::setup(){
 
     if(playing){
         trame.play();
+        trame.setPaused(1);
     }
 
 }
@@ -72,15 +73,37 @@ void ofApp::update(){
             //ofLog() << "b" << m.getArgAsInt32(0);
             if(m.getArgAsBool(0)){trame.play(); playing = 1;}
             else if(!m.getArgAsBool(0)){trame.stop(); playing = 0; clearLEDs(width*height);}
-            
+        }
+        
+        if(m.getAddress() == "/invert"){
+            //ofLog() << "invert" << m.getArgAsInt32(0);
+            inverted = m.getArgAsBool(0);
         }
 
+        if(m.getAddress() == "/sendImage"){
+            //ofLog() << "invert" << m.getArgAsInt32(0);
+            send = m.getArgAsBool(0);
+        }
+
+        
         if( !playing && m.getAddress() == "/image"){
         //    ofLog() << "nArgs" << m.getNumArgs();
             //NetBuffer.clear();
             NetBuffer = m.getArgAsBlob(0);
             setLEDs(NetBuffer.size(), (unsigned char*)NetBuffer.getData());
-        } 
+        }
+
+        if(m.getAddress() == "/pause"){
+            //ofLog() << "pause" << m.getArgAsInt32(0);
+            if(m.getArgAsBool(0)){trame.setPaused(1);}
+            else if(!m.getArgAsBool(0)){trame.setPaused(0);}
+        }
+
+        if(m.getAddress() == "/position"){
+            //ofLog() << "position" << m.getArgAsFloat(0);
+            trame.setPosition(m.getArgAsFloat(0));
+        }
+
 
         if(m.getAddress() == "/file"){
             //ofLog() << "nArgs" << m.getNumArgs();
@@ -88,7 +111,7 @@ void ofApp::update(){
             trame.load(m.getArgAsString(0));
             //ofLog(m.getArgAsString(0));
             trame.play();
-        } 
+        }
 
         if(m.getAddress() == "/host"){
             //    ofLog() << "nArgs" << m.getNumArgs();
@@ -96,10 +119,10 @@ void ofApp::update(){
             host=m.getArgAsString(0);
             sender.setup(host, PORT);
 
-            // now send list of files 
+            // now send list of files
             sendFileList();
             
-        } 
+        }
         
     }
  
@@ -116,9 +139,11 @@ void ofApp::update(){
             pixels.cropTo(PWMPix, 15, 0, 1, 16);
         }
 
-        if (send){     
+        if (send){
             imgAsBuffer.clear();
             imgAsBuffer.append((const char*)pixels.getData(),pixels.size());
+            
+            //ofLog() << "size: " << pixels.size();
 
             // PWMBuffer.clear();
             // PWMBuffer.append((const char*)PWMPix.getData(), PWMPix.size());
@@ -159,30 +184,47 @@ void ofApp::exit() {
 //--------------------------------------------------------------
 void ofApp::setLEDs(int numLed, unsigned char * LEDs) {
         int a;
-            uint8_t buffer0[1], buffer1[4];
-            srand(time(NULL));
-            int BRIGHTNESS;
+        uint8_t buffer0[1], buffer1[4];
+        srand(time(NULL));
+        int BRIGHTNESS;
 
-                //ofLog() << "mapBright: " << mapBright[BRIGHTNESS] ;
-                //ofLog() << "col: " << mapCol[BRIGHTNESS] ;
+        //ofLog() << "mapBright: " << mapBright[BRIGHTNESS] ;
+        //ofLog() << "col: " << mapCol[BRIGHTNESS] ;
 
-                for(a=0; a<4; a++){
-                    buffer0[0]=0b00000000;
-                    wiringPiSPIDataRW(0, (unsigned char*)buffer0, 1);
+        for(a=0; a<4; a++){
+            buffer0[0]=0b00000000;
+            wiringPiSPIDataRW(0, (unsigned char*)buffer0, 1);
+        }
+    
+        if (inverted) {
+            for (int w=0; w<width; w++){
+                 for (int h=height; h>0; h--){
+                     a = w*height+h;
+                     BRIGHTNESS=(int)LEDs[a*4+3];
+                     buffer1[0]=(mapBright[BRIGHTNESS] & 0b00011111) | 0b11100000;
+                     buffer1[1]=(int)LEDs[a*4+2]*mapCol[BRIGHTNESS];  //green
+                     buffer1[2]=(int)LEDs[a*4+1]*mapCol[BRIGHTNESS];  //blue
+                     buffer1[3]=(int)LEDs[a*4+0]*mapCol[BRIGHTNESS];  //red
+                     wiringPiSPIDataRW(0, (unsigned char*)buffer1, 4);
                 }
-                for(a=0; a<numLed; a++){
-                    BRIGHTNESS=(int)LEDs[a*4+3];
-                    buffer1[0]=(mapBright[BRIGHTNESS] & 0b00011111) | 0b11100000;
-                    buffer1[1]=(int)LEDs[a*4+2]*mapCol[BRIGHTNESS];  //green
-                    buffer1[2]=(int)LEDs[a*4+1]*mapCol[BRIGHTNESS];  //blue
-                    buffer1[3]=(int)LEDs[a*4+0]*mapCol[BRIGHTNESS];  //red
-                    wiringPiSPIDataRW(0, (unsigned char*)buffer1, 4);
-                }
-                for(a=0; a<4; a++){
-                    buffer0[0]=0b11111111;
-                    wiringPiSPIDataRW(0, (unsigned char*)buffer0, 1);
-                }
-              
+            }
+        }
+        else {
+            for(a=0; a<numLed; a++){
+                BRIGHTNESS=(int)LEDs[a*4+3];
+                buffer1[0]=(mapBright[BRIGHTNESS] & 0b00011111) | 0b11100000;
+                buffer1[1]=(int)LEDs[a*4+2]*mapCol[BRIGHTNESS];  //green
+                buffer1[2]=(int)LEDs[a*4+1]*mapCol[BRIGHTNESS];  //blue
+                buffer1[3]=(int)LEDs[a*4+0]*mapCol[BRIGHTNESS];  //red
+                wiringPiSPIDataRW(0, (unsigned char*)buffer1, 4);
+            }
+    
+        }
+
+        for(a=0; a<4; a++){
+            buffer0[0]=0b11111111;
+            wiringPiSPIDataRW(0, (unsigned char*)buffer0, 1);
+        }
 
     }
 
@@ -203,7 +245,7 @@ void ofApp::clearLEDs(int numLed) {
     }
 
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 
 void ofApp::sendFileList(){
 
@@ -221,7 +263,7 @@ void ofApp::sendFileList(){
         m.addStringArg(dir.getPath(i));
         sender.sendMessage(m);
     }
-}    
+}
 /*void ofApp::parseYAML(){
     yaml.load("m/data/init.yml");
     
@@ -231,7 +273,7 @@ void ofApp::sendFileList(){
     yaml.doc["host"] >> host;
     yaml.doc["send"] >> send;
     
-    cout << dec << "width: " << width << "* height: " << height << endl; 
+    cout << dec << "width: " << width << "* height: " << height << endl;
     cout << "send: " << send << endl;
 
 }
