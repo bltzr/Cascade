@@ -211,14 +211,14 @@ void ofApp::setLEDs(int numLed, unsigned char * LEDs) {
                 }
             } else {
                 for (int w=width-1; w>=0; w--){
-                     for (int h=0; h<height; h++){
-                         a = w*height+h;
-                         BRIGHTNESS=(int)LEDs[a*4+3];
-                         buffer1[0]=(mapBright[BRIGHTNESS] & 0b00011111) | 0b11100000;
-                         buffer1[1]=(int)LEDs[a*4+2]*mapCol[BRIGHTNESS];  //green
-                         buffer1[2]=(int)LEDs[a*4+1]*mapCol[BRIGHTNESS];  //blue
-                         buffer1[3]=(int)LEDs[a*4+0]*mapCol[BRIGHTNESS];  //red
-                         wiringPiSPIDataRW(0, (unsigned char*)buffer1, 4);
+                    for (int h=0; h<height; h++){
+                        a = w*height+h;
+                        BRIGHTNESS=(int)LEDs[a*4+3];
+                        buffer1[0]=(mapBright[BRIGHTNESS] & 0b00011111) | 0b11100000;
+                        buffer1[1]=(int)LEDs[a*4+2]*mapCol[BRIGHTNESS];  //green
+                        buffer1[2]=(int)LEDs[a*4+1]*mapCol[BRIGHTNESS];  //blue
+                        buffer1[3]=(int)LEDs[a*4+0]*mapCol[BRIGHTNESS];  //red
+                        wiringPiSPIDataRW(0, (unsigned char*)buffer1, 4);
                     }
                 }
             }
